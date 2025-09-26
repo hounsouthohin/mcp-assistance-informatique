@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  mcp-it-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mcp-it-assistant
+    restart: unless-stopped
+    
+    # Variables d'environnement
+    environment:
+      - MCP_TRANSPORT=stdio
+      - PYTHONUNBUFFERED=1
+      - TZ=Europe/Paris
+    
+    # Montage de volumes pour accès aux logs et fichiers
+    volumes:
+      - ./logs:/app/logs:ro
+      - ./data:/app/data:rw
+      - /var/log:/host/var/log:ro  # Accès en lecture aux logs système
+    
+    # Limites de ressources
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    
+    # Configuration réseau
+    networks:
+      - mcp-network
+    
+    # Politique de redémarrage
+    restart: unless-stopped
+    
+    # Labels pour la gestion
+    labels:
+      - "com.example.service=mcp-it-assistant"
+      - "com.example.version=1.0.0"
+      - "com.example.description=Serveur MCP pour assistance informatique"
+
+  # Service optionnel pour un proxy ou gateway
+  mcp-gateway:
+    image: nginx:alpine
+    container_name: mcp-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - mcp-network
+    depends_on:
+      - mcp-it-assistant
+    profiles:
+      - gateway
+
+networks:
+  mcp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  mcp-data:
+    driver: local
+  mcp-logs:
+    driver: local
