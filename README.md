@@ -1,335 +1,303 @@
 # 🔧 Serveur MCP d'Assistance Informatique
 
-Un serveur **Model Context Protocol (MCP)** complet conçu pour l'assistance informatique et le support technique. Ce projet expose une collection d'outils système utiles via une API standardisée MCP.
-
-## 📋 Table des matières
-
-- [Fonctionnalités](#-fonctionnalités)
-- [Outils disponibles](#-outils-disponibles)
-- [Installation](#-installation)
-- [Utilisation](#-utilisation)
-- [Configuration](#-configuration)
-- [API HTTP](#-api-http)
-- [Sécurité](#-sécurité)
-- [Développement](#-développement)
+Un serveur **Model Context Protocol (MCP)** complet pour l'assistance informatique, exposant des outils essentiels pour le diagnostic, la maintenance et la surveillance système.
 
 ## 🚀 Fonctionnalités
 
-- ✅ **Serveur MCP** conforme au protocole standard
-- 🌐 **Interface HTTP REST** pour une utilisation facile
-- 🐳 **Containerisation Docker** complète
-- 🛡️ **Sécurisé** avec utilisateur non-root et limitations
-- 📊 **Monitoring** avec health checks
-- 🔧 **12 outils système** intégrés
-- 📝 **Logging** complet et configurable
+### Outils Disponibles
 
-## 🛠️ Outils disponibles
+| Outil | Description | Utilisation |
+|-------|-------------|-------------|
+| `search_web` | Recherche d'informations sur le web | Recherche de documentation, solutions |
+| `calculator` | Calculatrice mathématique avancée | Calculs, fonctions trigonométriques |
+| `system_info` | Informations système détaillées | CPU, mémoire, disque, réseau, processus |
+| `ping_host` | Test de connectivité réseau | Diagnostic réseau, vérification d'accès |
+| `read_file` | Lecture de fichiers texte | Consultation de logs, configurations |
+| `http_request` | Requêtes HTTP personnalisées | Test d'APIs, vérification de services |
+| `port_scan` | Scan de ports réseau | Audit de sécurité, diagnostic réseau |
+| `log_analysis` | Analyse de fichiers de logs | Recherche d'erreurs, monitoring |
 
-### 🌍 Réseau et Connectivité
-- **`ping_host`** - Ping un hôte réseau avec statistiques détaillées
-- **`port_scan`** - Scanner les ports ouverts d'un hôte
-- **`dns_lookup`** - Résolution DNS directe et inverse
-- **`network_interfaces`** - Lister toutes les interfaces réseau
-- **`http_request`** - Exécuter des requêtes HTTP personnalisées
+## 📋 Prérequis
 
-### 💻 Système et Performance
-- **`system_info`** - Informations complètes du système (CPU, RAM, disque)
-- **`disk_usage`** - Analyse de l'utilisation du disque par partition
-- **`process_list`** - Lister et filtrer les processus en cours
-- **`check_service`** - Vérifier le statut des services système
+- **Docker** et **Docker Compose**
+- **Claude Desktop** avec mcp-toolkit-gateway configuré
+- **Python 3.11+** (pour le développement local)
 
-### 🔧 Utilitaires
-- **`calculator`** - Calculatrice sécurisée pour expressions mathématiques
-- **`read_file`** - Lecture sécurisée de fichiers texte
-- **`web_search`** - Recherche web basique (DuckDuckGo)
+## 🛠️ Installation
 
-## 📦 Installation
-
-### Prérequis
-- Docker et Docker Compose
-- Python 3.11+ (pour développement local)
-
-### 🐳 Installation avec Docker (Recommandée)
-
-1. **Cloner le projet**
+### 1. Cloner le projet
 ```bash
 git clone <repository-url>
-cd mcp-assistance-informatique
+cd mcp-it-assistant
 ```
 
-2. **Construire et démarrer avec Docker Compose**
+### 2. Construction avec Docker
+
 ```bash
-# Démarrage simple
+# Construction de l'image
+docker build -t mcp-it-assistant .
+
+# Ou utiliser Docker Compose
+docker-compose build
+```
+
+### 3. Déploiement avec Docker Compose
+
+```bash
+# Démarrage des services
 docker-compose up -d
 
-# Ou avec base de données (optionnel)
-docker-compose --profile with-db up -d
+# Vérification du statut
+docker-compose ps
+
+# Consultation des logs
+docker-compose logs -f mcp-it-assistant
 ```
 
-3. **Vérifier le fonctionnement**
-```bash
-curl http://localhost:8000/health
-```
+## ⚙️ Configuration avec Claude Desktop
 
-### 🐍 Installation locale (Développement)
+### Configuration mcp-toolkit-gateway
 
-1. **Installer les dépendances**
-```bash
-pip install -r requirements.txt
-```
+Pour utiliser ce serveur MCP avec Claude Desktop via mcp-toolkit-gateway, ajoutez cette configuration à votre fichier de configuration Claude Desktop :
 
-2. **Démarrer le serveur MCP**
-```bash
-python mcp_server.py
-```
-
-3. **Ou démarrer le serveur HTTP**
-```bash
-python http_server.py
-```
-
-## 🎯 Utilisation
-
-### Via Docker Compose
-
-```bash
-# Démarrer les services
-docker-compose up -d
-
-# Voir les logs
-docker-compose logs -f mcp-server
-
-# Arrêter les services
-docker-compose down
-```
-
-### Requêtes MCP standard
-
-```bash
-# Lister les outils
-curl -X POST http://localhost:8000/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "tools/list",
-    "id": "1"
-  }'
-
-# Appeler un outil
-curl -X POST http://localhost:8000/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "tools/call",
-    "params": {
-      "name": "system_info",
-      "arguments": {}
-    },
-    "id": "2"
-  }'
-```
-
-### API REST simplifiée
-
-```bash
-# Informations système
-curl http://localhost:8000/tools/system-info
-
-# Ping un hôte
-curl -X POST http://localhost:8000/tools/ping \
-  -H "Content-Type: application/json" \
-  -d '{"host": "google.com", "count": 4}'
-
-# Scanner des ports
-curl -X POST http://localhost:8000/tools/port-scan \
-  -H "Content-Type: application/json" \
-  -d '{"host": "localhost", "ports": "22,80,443"}'
-
-# Calculatrice
-curl -X POST http://localhost:8000/tools/calculator \
-  -H "Content-Type: application/json" \
-  -d '{"expression": "2 + 2 * 3"}'
-```
-
-## ⚙️ Configuration
-
-### Variables d'environnement
-
-```bash
-# Niveau de logging
-LOG_LEVEL=INFO
-
-# Port du serveur HTTP
-PORT=8000
-
-# Mode debug
-DEBUG=false
-```
-
-### Fichiers de configuration
-
-- `docker-compose.yml` - Configuration des services
-- `Dockerfile` - Configuration du container
-- `requirements.txt` - Dépendances Python
-
-### Volumes Docker
-
-```yaml
-volumes:
-  - /var/log:/host/var/log:ro      # Logs système (lecture seule)
-  - ./data:/app/data               # Données persistantes
-  - ./config:/app/config:ro        # Configuration (lecture seule)
-```
-
-## 🌐 API HTTP
-
-### Endpoints principaux
-
-| Endpoint | Méthode | Description |
-|----------|---------|-------------|
-| `/` | GET | Informations du serveur |
-| `/health` | GET | Vérification de santé |
-| `/tools` | GET | Liste des outils |
-| `/mcp` | POST | Requêtes MCP standard |
-| `/call/{tool_name}` | POST | Appel direct d'outil |
-
-### Documentation interactive
-
-Une fois le serveur démarré, accédez à :
-- **Swagger UI** : http://localhost:8000/docs
-- **ReDoc** : http://localhost:8000/redoc
-
-## 🛡️ Sécurité
-
-### Mesures de sécurité implémentées
-
-- 🔒 **Utilisateur non-root** dans le container
-- 📏 **Limitation des ressources** (CPU, mémoire)
-- 🚫 **Validation des entrées** pour tous les outils
-- 📂 **Accès fichiers limité** (taille max 10MB)
-- 🌐 **Timeout réseau** configuré (10s max)
-- 🔍 **Sanitisation** des expressions mathématiques
-
-### Recommandations de déploiement
-
-- Utiliser un reverse proxy (nginx, traefik)
-- Configurer HTTPS avec certificats TLS
-- Limiter l'accès réseau aux services nécessaires
-- Surveiller les logs d'accès et d'erreur
-- Effectuer des sauvegardes régulières
-
-## 🔧 Développement
-
-### Structure du projet
-
-```
-mcp-assistance-informatique/
-├── mcp_server.py          # Serveur MCP principal
-├── http_server.py         # Interface HTTP REST
-├── requirements.txt       # Dépendances Python
-├── Dockerfile            # Configuration Docker
-├── docker-compose.yml    # Orchestration Docker
-├── README.md            # Documentation
-├── data/               # Données persistantes
-├── config/             # Fichiers de configuration
-└── logs/               # Fichiers de logs
-```
-
-### Ajouter un nouvel outil
-
-1. **Implémenter la méthode dans MCPServer**
-```python
-async def mon_nouvel_outil(self, param1: str, param2: int = 10) -> Dict[str, Any]:
-    """Description de l'outil"""
-    try:
-        # Logique de l'outil
-        result = {"param1": param1, "param2": param2}
-        return result
-    except Exception as e:
-        return {"error": str(e)}
-```
-
-2. **Ajouter à la liste des outils**
-```python
-def __init__(self):
-    self.tools = {
-        # ... outils existants
-        "mon_nouvel_outil": self.mon_nouvel_outil,
-    }
-```
-
-3. **Définir le schéma dans list_tools_response**
-```python
+```json
 {
-    "name": "mon_nouvel_outil",
-    "description": "Description de l'outil",
-    "inputSchema": {
-        "type": "object",
-        "properties": {
-            "param1": {"type": "string", "description": "Description param1"},
-            "param2": {"type": "integer", "description": "Description param2", "default": 10}
-        },
-        "required": ["param1"]
+  "mcpServers": {
+    "mcp-toolkit-gateway": {
+      "command": "npx",
+      "args": [
+        "@anthropic-ai/mcp-toolkit-gateway",
+        "--config-file",
+        "/path/to/your/mcp-config.json"
+      ]
     }
+  }
 }
 ```
 
-### Tests
+### Fichier de configuration MCP (mcp-config.json)
 
-```bash
-# Tests unitaires
-python -m pytest tests/
-
-# Test des endpoints
-curl -X GET http://localhost:8000/health
-curl -X GET http://localhost:8000/tools
+```json
+{
+  "servers": {
+    "it-assistant": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network=host",
+        "-v", "/var/log:/host/var/log:ro",
+        "-v", "./data:/app/data:rw",
+        "mcp-it-assistant"
+      ],
+      "env": {
+        "MCP_TRANSPORT": "stdio"
+      }
+    }
+  }
+}
 ```
 
-### Logs
+### Configuration alternative (exécution locale)
 
-```bash
-# Voir les logs en temps réel
-docker-compose logs -f mcp-server
+Si vous préférez exécuter le serveur localement sans Docker :
 
-# Logs d'un service spécifique
-docker logs mcp-assistance-informatique
+```json
+{
+  "servers": {
+    "it-assistant": {
+      "command": "python",
+      "args": ["/path/to/mcp-it-assistant/server.py"],
+      "env": {
+        "MCP_TRANSPORT": "stdio"
+      }
+    }
+  }
+}
 ```
 
-## 📈 Monitoring
+## 🚀 Utilisation
 
-### Health checks
+### Démarrage rapide
 
-Le serveur inclut des vérifications de santé automatiques :
-- Vérification HTTP toutes les 30 secondes
-- Timeout de 10 secondes
-- 3 tentatives avant échec
+```bash
+# Démarrage avec Docker Compose
+docker-compose up -d
 
-### Métriques disponibles
+# Test de fonctionnement
+docker-compose exec mcp-it-assistant python -c "import psutil; print(f'CPU: {psutil.cpu_percent()}%')"
+```
 
-- Statut des services
-- Utilisation des ressources
-- Statistiques des appels d'outils
-- Temps de réponse
+### Exemples d'utilisation dans Claude Desktop
+
+Une fois configuré, vous pouvez utiliser les outils directement dans Claude Desktop :
+
+#### 1. Informations système
+```
+Peux-tu me donner les informations sur l'utilisation du CPU et de la mémoire ?
+```
+
+#### 2. Test de connectivité
+```
+Peux-tu pinger google.com pour vérifier la connectivité ?
+```
+
+#### 3. Analyse de logs
+```
+Peux-tu analyser le fichier /var/log/syslog à la recherche d'erreurs récentes ?
+```
+
+#### 4. Calculs techniques
+```
+Calcule la puissance nécessaire : sqrt(220^2 + 110^2) * 1.732
+```
+
+## 📁 Structure du projet
+
+```
+mcp-it-assistant/
+├── server.py              # Serveur MCP principal
+├── requirements.txt       # Dépendances Python
+├── Dockerfile             # Configuration Docker
+├── docker-compose.yml     # Orchestration Docker
+├── README.md              # Documentation
+├── nginx.conf             # Configuration proxy (optionnel)
+├── logs/                  # Répertoire des logs
+├── data/                  # Répertoire de données
+└── examples/              # Exemples d'utilisation
+    └── mcp-config.json    # Configuration exemple
+```
+
+## 🔧 Configuration avancée
+
+### Variables d'environnement
+
+| Variable | Description | Défaut |
+|----------|-------------|---------|
+| `MCP_TRANSPORT` | Type de transport MCP | `stdio` |
+| `PYTHONUNBUFFERED` | Sortie Python non bufferisée | `1` |
+| `TZ` | Fuseau horaire | `Europe/Paris` |
+
+### Volumes Docker
+
+- `./logs:/app/logs:ro` - Logs applicatifs (lecture seule)
+- `./data:/app/data:rw` - Données persistantes (lecture/écriture)
+- `/var/log:/host/var/log:ro` - Logs système hôte (lecture seule)
+
+### Limites de ressources
+
+```yaml
+deploy:
+  resources:
+    limits:
+      cpus: '1.0'
+      memory: 512M
+    reservations:
+      cpus: '0.25'
+      memory: 128M
+```
+
+## 🔒 Sécurité
+
+### Bonnes pratiques implémentées
+
+1. **Utilisateur non-root** dans le conteneur
+2. **Limitation des ressources** CPU/mémoire
+3. **Accès en lecture seule** aux logs système
+4. **Validation des entrées** pour tous les outils
+5. **Timeout sur les opérations** réseau
+6. **Sandboxing** des calculs mathématiques
+
+### Recommandations
+
+- Limiter l'accès réseau si non nécessaire
+- Surveiller les logs d'utilisation
+- Configurer un firewall approprié
+- Utiliser des volumes chiffrés pour les données sensibles
+
+## 🐛 Dépannage
+
+### Problèmes courants
+
+#### Le serveur ne démarre pas
+```bash
+# Vérifier les logs
+docker-compose logs mcp-it-assistant
+
+# Vérifier la configuration
+docker-compose config
+```
+
+#### Erreurs de permissions
+```bash
+# Corriger les permissions des volumes
+chmod -R 755 ./logs ./data
+chown -R $USER:$USER ./logs ./data
+```
+
+#### Problèmes de connectivité réseau
+```bash
+# Tester la connectivité depuis le conteneur
+docker-compose exec mcp-it-assistant ping google.com
+
+# Vérifier la configuration réseau
+docker network ls
+docker network inspect mcp-it-assistant_mcp-network
+```
+
+### Logs et monitoring
+
+```bash
+# Logs en temps réel
+docker-compose logs -f
+
+# Logs spécifiques au service
+docker-compose logs mcp-it-assistant
+
+# Statistiques des conteneurs
+docker stats
+```
+
+## 🔄 Mise à jour
+
+```bash
+# Arrêter les services
+docker-compose down
+
+# Mettre à jour le code
+git pull
+
+# Reconstruire et redémarrer
+docker-compose build --no-cache
+docker-compose up -d
+```
 
 ## 🤝 Contribution
 
 1. Fork le projet
-2. Créer une branche (`git checkout -b feature/nouvelle-fonctionnalite`)
-3. Commit (`git commit -am 'Ajout nouvelle fonctionnalité'`)
-4. Push (`git push origin feature/nouvelle-fonctionnalite`)
+2. Créer une branche feature (`git checkout -b feature/nouvelle-fonctionnalite`)
+3. Commit les changements (`git commit -am 'Ajout nouvelle fonctionnalité'`)
+4. Push vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
 5. Créer une Pull Request
 
-## 📄 Licence
+## 📝 Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ## 🆘 Support
 
-- 📧 Email : support@example.com
-- 🐛 Issues : GitHub Issues
-- 📖 Wiki : GitHub Wiki
-- 💬 Discord : [Serveur Discord](https://discord.gg/example)
+- **Issues GitHub** : Pour signaler des bugs ou demander des fonctionnalités
+- **Discussions** : Pour les questions générales et l'aide communautaire
+- **Wiki** : Pour la documentation détaillée
+
+## 🔗 Liens utiles
+
+- [Documentation MCP](https://modelcontextprotocol.io/)
+- [Claude Desktop](https://claude.ai/desktop)
+- [mcp-toolkit-gateway](https://github.com/anthropics/mcp-toolkit-gateway)
+- [Docker Documentation](https://docs.docker.com/)
 
 ---
 
-**Développé avec ❤️ pour l'assistance informatique**# mcp-assistance-informatique
+**Note** : Ce serveur MCP est conçu pour être utilisé avec Claude Desktop via mcp-toolkit-gateway. Assurez-vous d'avoir correctement configuré votre environnement avant utilisation.
